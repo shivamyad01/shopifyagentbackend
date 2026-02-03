@@ -20,6 +20,12 @@ api.interceptors.response.use(
     const status = err?.response?.status;
     if (status === 401) {
       localStorage.removeItem("token");
+      if (typeof window !== "undefined") {
+        const path = window.location?.pathname || "";
+        if (path !== "/login") {
+          window.location.href = "/login";
+        }
+      }
     }
     const message =
       err?.response?.data?.message || err.message || "Request failed";
@@ -43,6 +49,7 @@ export const analyticsApi = {
 
 export const storesApi = {
   connect: (shop) => api.post("/stores/connect", { shop }).then((r) => r.data),
+  status: () => api.get("/stores/status").then((r) => r.data),
 };
 
 export const adminApi = {
@@ -51,5 +58,7 @@ export const adminApi = {
     api
       .post("/admin/tenants", { tenantName, ownerEmail, ownerPassword })
       .then((r) => r.data),
+  connectStore: ({ tenantId, shop }) =>
+    api.post("/admin/stores/connect", { tenantId, shop }).then((r) => r.data),
   stores: () => api.get("/admin/stores").then((r) => r.data),
 };
